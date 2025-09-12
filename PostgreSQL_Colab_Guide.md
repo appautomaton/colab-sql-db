@@ -36,13 +36,11 @@ With PostgreSQL running, the next step is to create a new database and load it w
 
 You can connect directly to the database from a Colab cell to execute SQL commands using the `psql` command-line utility. The following sections demonstrate how to run queries.
 
-## 3. Basic SQL Operations
+## 3. Basic SQL Operations (via command line)
 
 All basic SQL operations can be run by passing the query as a string to the `psql` command.
 
 ### Creating a Table
-
-This command creates a new table to store simple logs.
 
 ```bash
 !sudo -u postgres psql -d chinook -c "CREATE TABLE system_logs (id SERIAL PRIMARY KEY, message TEXT, timestamp TIMESTAMPTZ DEFAULT NOW());"
@@ -50,19 +48,11 @@ This command creates a new table to store simple logs.
 
 ### Inserting Data
 
-Here, we insert a record into our new `system_logs` table and then query the `Artist` table to see what's there.
-
 ```bash
-# Insert a log message
 !sudo -u postgres psql -d chinook -c "INSERT INTO system_logs (message) VALUES ('System initialized successfully.');"
-
-# Display the new record
-!sudo -u postgres psql -d chinook -c "SELECT * FROM system_logs;"
 ```
 
 ### Querying Data
-
-Let's run a query against the Chinook data. This query joins the `Artist` and `Album` tables to list 10 albums and their artists.
 
 ```bash
 !sudo -u postgres psql -d chinook -c "SELECT ar.Name AS Artist, al.Title AS Album FROM Artist ar JOIN Album al ON ar.ArtistId = al.ArtistId ORDER BY ar.Name LIMIT 10;"
@@ -70,21 +60,82 @@ Let's run a query against the Chinook data. This query joins the `Artist` and `A
 
 ### Updating Records
 
-This command updates the log message we inserted earlier.
-
 ```bash
-# Update the log message
 !sudo -u postgres psql -d chinook -c "UPDATE system_logs SET message = 'System status: OK' WHERE id = 1;"
-
-# Display the updated record
-!sudo -u postgres psql -d chinook -c "SELECT * FROM system_logs;"
 ```
 
-## 4. Conclusion
+## 4. Querying with Python in Colab (Recommended)
 
-You have successfully set up PostgreSQL in Google Colab, loaded a sample database, and performed fundamental CRUD (Create, Read, Update, Delete) operations. This environment provides a powerful and flexible way to work with relational data for analysis and development.
+For a true interactive Colab experience, you can run SQL queries within Python cells using the `ipython-sql` library. This allows you to easily integrate SQL queries into your data analysis workflow with libraries like Pandas.
+
+### Step 1: Install Python Libraries
+
+You'll need `ipython-sql` to run SQL queries in notebook cells and `psycopg2` to act as the driver for PostgreSQL.
+
+```python
+!pip install ipython-sql psycopg2-binary
+```
+
+### Step 2: Load the SQL Extension
+
+After installation, you need to load the `sql` magic command extension.
+
+```python
+%load_ext sql
+```
+
+### Step 3: Connect to the Database
+
+Now, create the connection string and connect to the `chinook` database.
+
+```python
+# The format is postgresql://user:password@host/database
+%sql postgresql://postgres@localhost/chinook
+```
+
+### Step 4: Run Queries Interactively
+
+You can now run SQL queries directly in a cell. For a single-line query, use `%sql`:
+
+```python
+%sql SELECT ar.Name AS "Artist", al.Title AS "Album" FROM Artist ar JOIN Album al ON ar.ArtistId = al.ArtistId ORDER BY ar.Name LIMIT 5;
+```
+
+For multi-line queries, use `%%sql` at the beginning of the cell:
+
+```python
+%%sql
+SELECT
+    c.FirstName,
+    c.LastName,
+    i.Total
+FROM Customer c
+JOIN Invoice i ON c.CustomerId = i.CustomerId
+WHERE c.Country = 'USA'
+ORDER BY i.Total DESC
+LIMIT 5;
+```
+
+### Step 5: Save Query Results to a Pandas DataFrame
+
+This is the most powerful feature for data analysis. You can assign the result of a query to a variable and convert it into a Pandas DataFrame.
+
+```python
+# First, run the query and assign the results
+results = %sql SELECT * FROM Track WHERE UnitPrice > 0.99;
+
+# Then, convert the results to a DataFrame
+df = results.DataFrame()
+
+# Now you can use pandas as usual
+print(df.head())
+```
+
+## 5. Conclusion
+
+You have successfully set up PostgreSQL in Google Colab, loaded a sample database, and performed fundamental operations using both the command line and Python. Using `ipython-sql` provides a powerful and flexible way to work with relational data for analysis and development directly within your notebook.
 
 ### Further Learning
 
 - **Official PostgreSQL Documentation:** [https://www.postgresql.org/docs/](https://www.postgresql.org/docs/)
-- **Connecting with Python:** For programmatic access, explore the `psycopg2` or `sqlalchemy` libraries to connect your Python code to the running database.
+- **SQLAlchemy:** For more advanced programmatic access and Object-Relational Mapping (ORM), explore [SQLAlchemy](https://www.sqlalchemy.org/).
