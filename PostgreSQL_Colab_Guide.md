@@ -28,6 +28,7 @@ print("✅ PostgreSQL and SQL magic installed")
 %config SqlMagic.feedback = True      # Show query execution time
 %config SqlMagic.displaycon = False   # Hide connection string from output
 %config SqlMagic.displaylimit = 20    # Default row limit for display
+%config SqlMagic.style = '_DEPRECATED_DEFAULT'
 
 print("✅ SQL magic configured")
 print("\n📝 Available commands:")
