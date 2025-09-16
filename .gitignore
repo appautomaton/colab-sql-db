@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# macOS metadata on network shares
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+
+# Editor backups
+*~
+*.swp
